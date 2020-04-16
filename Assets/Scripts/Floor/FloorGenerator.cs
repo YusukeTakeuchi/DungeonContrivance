@@ -17,8 +17,8 @@ namespace Floor {
         public const int BLOCK_WIDTH = 3;
         public const int BLOCK_HEIGHT = 4;
 
-        public const int MIN_ROOM_NUM = 4;
-        public const int MAX_ROOM_NUM = 7;
+        public const int MIN_ROOM_NUM = 7;
+        public const int MAX_ROOM_NUM = 10;
 
         public const int MIN_ROOM_WIDTH = 4;
         public const int MAX_ROOM_WIDTH = 10;

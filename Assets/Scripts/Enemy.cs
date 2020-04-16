@@ -8,10 +8,21 @@ using Util.RandomUtil;
 
 public class Enemy : MonoBehaviour
 {
+
+    private struct Action
+    {
+        public Vector2Int? posTo;
+        public Dir dir;
+        //public Vector2Int? destination;
+        public bool resetDestination;
+        public bool endTurn;
+    }
+
     private const int MOVING_DURATION = 8;
 
     private FloorData floor;
 
+    public Vector2Int? posPrev;
     public Vector2Int posFrom;
     public Vector2Int? posTo;
 
@@ -19,14 +30,6 @@ public class Enemy : MonoBehaviour
 
     private int movingCount = 0;
 
-    private struct Action
-    {
-        public Vector2Int? posTo;
-        public Dir dir;
-        public Vector2Int? destination;
-        public bool resetDestination;
-        public bool endTurn;
-    }
     
 
     public Vector2Int pos
@@ -46,8 +49,8 @@ public class Enemy : MonoBehaviour
     {
         floor = Global.GetInstance().floor;
 
+        posPrev = null;
         posFrom = GetRandomRoomPos();
-
         posTo = null;
 
         // TODO: make better
@@ -70,6 +73,7 @@ public class Enemy : MonoBehaviour
             // finish and restart moving
             if (posTo is Vector2Int posToReal)
             {
+                posPrev = posFrom;
                 posFrom = posToReal;
             }
             DoAction();
@@ -182,7 +186,8 @@ public class Enemy : MonoBehaviour
         }
         else
         {
-            return entrances.TakeRandom();
+            var entrancesExceptPrevPos = entrances.Where(ePos => ePos != this.posPrev);
+            return (entrancesExceptPrevPos.Count() == 0 ? entrances : entrancesExceptPrevPos).TakeRandom();
         }
     }
 
@@ -257,10 +262,12 @@ public class Enemy : MonoBehaviour
         {
             this.dir = action.dir;
         }
+        /*
         if (action.destination != null)
         {
             this.destination = action.destination;
         }
+        */
         if (action.resetDestination)
         {
             this.destination = null;
