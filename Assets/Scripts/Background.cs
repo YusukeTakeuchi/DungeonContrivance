@@ -14,7 +14,7 @@ public class Background : MonoBehaviour
     {
         tilemap = gameObject.GetComponent<Tilemap>();
 
-        var floorData = (new FloorGenerator()).generate();
+        var floorData = Global.GetInstance().floor.attrs;
         for (int y=0; y<floorData.GetLength(0); y++)
         {
             for (int x=0; x<floorData.GetLength(1); x++)
@@ -35,18 +35,18 @@ public class Background : MonoBehaviour
     private Tile GetTileFromFloorAttribute(FloorAttribute attr)
     {
         string name = null;
-        switch (attr)
+        switch (attr.kind)
         {
-            case FloorAttribute.WALL:
+            case FloorAttributeKind.WALL:
                 name = "Wall";
                 break;
-            case FloorAttribute.HARD_WALL:
+            case FloorAttributeKind.HARD_WALL:
                 name = "HardWall";
                 break;
-            case FloorAttribute.ROOM:
+            case FloorAttributeKind.ROOM:
                 name = "Room";
                 break;
-            case FloorAttribute.PASSAGE:
+            case FloorAttributeKind.PASSAGE:
                 name = "Passage";
                 break;
         }

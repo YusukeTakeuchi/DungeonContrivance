@@ -1,34 +1,13 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using static Util.MatrixUtil;
+using Util.MatrixUtil;
+using Util.RandomUtil;
 using UnityEngine;
-using Util;
 using Math = System.Math;
 
 namespace Floor {
 
-    public enum FloorAttribute
-    {
-        WALL,
-        HARD_WALL,
-        ROOM,
-        PASSAGE,
-    }
-
-    public class Block
-    {
-        public RectInt rect;
-
-        public Room room;
-
-    }
-
-    public class Room
-    {
-        public RectInt rect;
-
-    }
 
     public class FloorGenerator
     {
@@ -49,24 +28,28 @@ namespace Floor {
 
         public const int ROOM_MARGIN = 2;
 
-        public readonly FloorAttribute[,] floor;
+        public readonly FloorAttribute[,] attrs;
         public readonly Block[,] blocks;
         public List<Room> rooms;
         
 
         public FloorGenerator()
         {
-            floor = new FloorAttribute[FLOOR_HEIGHT, FLOOR_WIDTH];
+            attrs = new FloorAttribute[FLOOR_HEIGHT, FLOOR_WIDTH];
             blocks = InitBlocks();
         }
 
-        public FloorAttribute[,] generate()
+        public FloorData generate()
         {
             InitFloorAttributes();
             CreateRooms();
             SetFloorAttributesFromRooms();
             CreatePassages();
-            return floor;
+            return new FloorData()
+            {
+                attrs = attrs,
+                rooms = rooms,
+            };
         }
 
         private Block[,] InitBlocks()
@@ -93,8 +76,8 @@ namespace Floor {
         {
             // put walls to the entire floor.
             // put hard walls to outmost edge.
-            SetAttributeRect(FloorAttribute.HARD_WALL, 0, FLOOR_WIDTH, 0, FLOOR_HEIGHT);
-            SetAttributeRect(FloorAttribute.WALL, 1, FLOOR_WIDTH - 1, 1, FLOOR_HEIGHT - 1);
+            SetAttributeRect(FloorAttribute.HardWall, 0, FLOOR_WIDTH, 0, FLOOR_HEIGHT);
+            SetAttributeRect(FloorAttribute.Wall, 1, FLOOR_WIDTH - 1, 1, FLOOR_HEIGHT - 1);
         }
 
         private void CreateRooms()
@@ -117,7 +100,7 @@ namespace Floor {
         {
             foreach (var room in rooms)
             {
-                SetAttributeRect(FloorAttribute.ROOM, room.rect);
+                SetAttributeRect(FloorAttribute.Room(room), room.rect);
             }
         }
 
@@ -227,22 +210,22 @@ namespace Floor {
         private void MakeHorizontalPassageConnecting(Vector2Int start, Vector2Int end)
         {
             int cornerX = Random.Range(start.x + 1, end.x);
-            SetAttributeRect(FloorAttribute.PASSAGE, start.x, cornerX + 1, start.y, start.y + 1);
-            SetAttributeRect(FloorAttribute.PASSAGE, cornerX, cornerX + 1,
+            SetAttributeRect(FloorAttribute.Passage, start.x, cornerX + 1, start.y, start.y + 1);
+            SetAttributeRect(FloorAttribute.Passage, cornerX, cornerX + 1,
                 Math.Min(start.y, end.y),
                 Math.Max(start.y, end.y) + 1);
-            SetAttributeRect(FloorAttribute.PASSAGE, cornerX, end.x + 1, end.y, end.y + 1);
+            SetAttributeRect(FloorAttribute.Passage, cornerX, end.x + 1, end.y, end.y + 1);
         }
 
         private void MakeVerticalPassageConnecting(Vector2Int start, Vector2Int end)
         {
             int cornerY = Random.Range(start.y + 1, end.y);
-            SetAttributeRect(FloorAttribute.PASSAGE, start.x, start.x + 1, start.y, cornerY + 1);
-            SetAttributeRect(FloorAttribute.PASSAGE,
+            SetAttributeRect(FloorAttribute.Passage, start.x, start.x + 1, start.y, cornerY + 1);
+            SetAttributeRect(FloorAttribute.Passage,
                 Math.Min(start.x, end.x),
                 Math.Max(start.x, end.x) + 1,
                 cornerY, cornerY + 1);
-            SetAttributeRect(FloorAttribute.PASSAGE, end.x, end.x + 1, cornerY, end.y + 1);
+            SetAttributeRect(FloorAttribute.Passage, end.x, end.x + 1, cornerY, end.y + 1);
         }
 
 
@@ -260,7 +243,7 @@ namespace Floor {
             {
                 for (int x = left; x < right; x++)
                 {
-                    floor[y, x] = attr;
+                    attrs[y, x] = attr;
                 }
             }
         }

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Util
 {
-    public static class MatrixUtil
+    namespace MatrixUtil
     {
 
         // access two-dimensional arrays with a single index
@@ -60,6 +60,38 @@ namespace Util
                 return GetEnumerator();
             }
 
+        }
+
+        public static class Extensions
+        {
+            public static IEnumerable<(int, int)> EachIndex<T>(this T[,] matrix)
+            {
+                int rows = matrix.GetLength(0);
+                int cols = matrix.GetLength(1);
+                for (int y = 0; y < rows; y++)
+                {
+                    for (int x = 0; x < cols; x++)
+                    {
+                        yield return (y, x);
+                    }
+                }
+            }
+
+            public static IEnumerable<(T, int, int)> EachWithIndex<T>(this T[,] matrix)
+            {
+                foreach (var (y, x) in matrix.EachIndex())
+                {
+                    yield return (matrix[y, x], y, x);
+                }
+            }
+
+            public static IEnumerable<T> Each<T>(this T[,] matrix)
+            {
+                foreach (var (v, y, x) in matrix.EachWithIndex())
+                {
+                    yield return v;
+                }
+            }
         }
     }
 }
