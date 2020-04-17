@@ -5,24 +5,21 @@ using UnityEngine.InputSystem;
 
 public class InputController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+
+    public void OnClick()
     {
-        
+        SetSwordPos();
     }
 
-    // Update is called once per frame
-    void Update()
+
+    private void SetSwordPos()
     {
-        if (Mouse.current.leftButton.wasReleasedThisFrame)
-        {
-            var sword = GameObject.Find("Sword");
-            float z = sword.transform.position.z;
-            var pointClicked = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            var pos = Plane.WorldPointToPlanePos(pointClicked);
-            Debug.Log(pointClicked);
-            Debug.Log(pos);
-            GameObject.Find("Sword").GetComponent<Sword>().pos = pos;
-        }
+        var sword = GameObject.Find("Sword");
+        float z = sword.transform.position.z;
+        var pointClicked = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+        var pos = Plane.WorldPointToPlanePos(pointClicked);
+        Debug.Log(pointClicked);
+        Debug.Log(pos);
+        GameObject.Find("Sword").GetComponent<Sword>().pos = pos;
     }
 }
