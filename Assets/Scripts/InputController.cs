@@ -18,9 +18,11 @@ public class InputController : MonoBehaviour
         {
             var sword = GameObject.Find("Sword");
             float z = sword.transform.position.z;
-            var posClicked = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
-            posClicked.z = z;
-            sword.transform.position = posClicked;
+            var pointClicked = Camera.main.ScreenToWorldPoint(Mouse.current.position.ReadValue());
+            var pos = Plane.WorldPointToPlanePos(pointClicked);
+            Debug.Log(pointClicked);
+            Debug.Log(pos);
+            GameObject.Find("Sword").GetComponent<Sword>().pos = pos;
         }
     }
 }

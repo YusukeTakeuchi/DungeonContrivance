@@ -30,8 +30,6 @@ public class Enemy : MonoBehaviour
 
     private int movingCount = 0;
 
-    
-
     public Vector2Int pos
     {
         get => this.posFrom;
@@ -44,6 +42,8 @@ public class Enemy : MonoBehaviour
 
     public Vector2Int? destination;
 
+    private ParticleSystem particle;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -55,6 +55,8 @@ public class Enemy : MonoBehaviour
 
         // TODO: make better
         dir = Dir.Down;
+
+        particle = transform.Find("DamageParticle").gameObject.GetComponent<ParticleSystem>();
 
         SetTransformPos();
     }
@@ -77,6 +79,7 @@ public class Enemy : MonoBehaviour
                 posFrom = posToReal;
             }
             DoAction();
+            SetAttackingState();
         }
         else
         {
@@ -199,23 +202,6 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    /*
-    private void StartStep()
-    {
-        var dir = NextStepDir(posFrom);
-        if (dir == null)
-        {
-            posTo = posFrom;
-            this.dir = Dir.Random();
-        }
-        else
-        {
-            posTo = posFrom + dir;
-            this.dir = dir;
-        }
-    }
-    */
-
     private Action GoForward()
     {
         int[] relDirCounts = { 0, 1, -1, 2, -2 };
@@ -274,26 +260,34 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void SetTransformPos()
+    private void SetAttackingState()
     {
-        var charaSize = gameObject.GetComponent<SpriteRenderer>().bounds.size;
-        var position = gameObject.transform.position;
-
-        if (this.posTo is Vector2Int posToReal)
+        var sword = GameObject.Find("Sword").GetComponent<Sword>();
+        var deltaFrom = sword.pos - this.posFrom;
+        var deltaTo = (sword.pos - this.posTo) ?? new Vector2Int(0, 0);
+        int distance = (new int[] { deltaFrom.x, deltaFrom.y, deltaTo.x, deltaTo.y }).Select( v => System.Math.Abs(v)).Max();
+        if (distance <= 4)
         {
-            var delta = posToReal - this.posFrom;
-            position.x =
-                this.posFrom.x * Background.TILE_SIZE +
-                delta.x * movingCount * Background.TILE_SIZE / MOVING_DURATION;
-            position.y = -(
-                this.posFrom.y * Background.TILE_SIZE +
-                delta.y * movingCount * Background.TILE_SIZE / MOVING_DURATION
-            );
+            particle.Play();
         }
         else
         {
-            position.x = this.posFrom.x * Background.TILE_SIZE;
-            position.y = -(this.posFrom.y * Background.TILE_SIZE);
+            particle.Stop();
+        }
+    }
+
+    private void SetTransformPos()
+    {
+        var charaSize = gameObject.GetComponent<SpriteRenderer>().bounds.size;
+        Vector3 position;
+
+        if (this.posTo is Vector2Int posToReal)
+        {
+            position = Plane.PlanePosIntermediateToWorldPoint(this.posFrom, posToReal, (float)movingCount / MOVING_DURATION);
+        }
+        else
+        {
+            position = Plane.PlanePosToWorldPoint(this.posFrom);
         }
 
         gameObject.transform.position = position;
